@@ -1,14 +1,11 @@
 """
 Check Sodar main data files for incongruities.
-
-Usage: python report.py [/path/to/main/data/monthly/directories]
-
-Output is copied to report.log.
 """
 
 import os
 import sys
 import logging
+import argparse
 import traceback
 from datetime import datetime, timedelta
 from glob import glob
@@ -254,15 +251,14 @@ def log_grid(segment2):
     return None
 
 
-def main(mnd_path='/seacoos/data/nccoos/level0/billymitchell/sodar1/mnd'):
+def main(mnd_path, logfile):
     """Report on incongruities in main data files."""
 
     # Set up logging to file and console
-    LOGFILE = os.path.splitext(os.path.abspath(sys.argv[0]))[0] + '.log'
     LEVEL = logging.DEBUG
     FORMAT = '%(asctime)s:%(levelname)s:%(message)s'
     DATEFMT = '%m/%d/%Y %I:%M:%S %p'
-    logging.basicConfig(filename=LOGFILE,
+    logging.basicConfig(filename=logfile,
                         filemode='w',
                         level=LEVEL,
                         format=FORMAT,
@@ -376,7 +372,14 @@ def main(mnd_path='/seacoos/data/nccoos/level0/billymitchell/sodar1/mnd'):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
-    else:
-        main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-p', '--path',
+                        dest='mnd_path',
+                        default = '/seacoos/data/nccoos/level0/billymitchell/sodar1/mnd',
+                        metavar='/path/to/main/data/monthly/subdirectories')
+    parser.add_argument('-l', '--logfile',
+                        dest='logfile',
+                        default=os.path.splitext(os.path.abspath(sys.argv[0]))[0] + '.log',
+                        metavar='/path/to/log/file')
+    args = parser.parse_args()
+    main(args.mnd_path, args.logfile)
