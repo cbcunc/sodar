@@ -240,7 +240,7 @@ def parse2(segments, mnd, segment0, segment1, inconsistent_segments):
 
     return segment2
 
-def log_grid(segment2):
+def log_grid(segment1, segment2):
     """Log the grid dictionary values"""
 
     logging.info('   Sample interval: {0} seconds'.format(segment2['sample_interval'].seconds))
@@ -248,6 +248,10 @@ def log_grid(segment2):
     logging.info('   Maximum elevation: {0!s} meters'.format(segment2['max_elevation']))
     logging.info('   Bin height: {0!s} meters'.format(segment2['bin_height']))
     logging.info('   Bin count: {0!s}'.format(segment2['bin_count']))
+    logging.info('   Angle: {0!s} degrees'.format(segment1['angle']))
+    logging.info('   Base elevation: {0!s} meters'.format(segment1['elevation']))
+    logging.info('   Base height: {0!s} meters'.format(segment1['height']))
+    logging.info('   Variables: {0!s}'.format(segment1['variables']))
     return None
 
 
@@ -302,10 +306,10 @@ def main(mnd_path, logfile):
                         segment1 = parse1(segments[1], mnd, segment0)
                         segment2 = parse2(segments, mnd, segment0, segment1, inconsistent_segments)
                         if prev_mnd:
-                            if segment2 != prev_segment2:
-                                incongruent_mnds.append((mnd, segment2))
+                            if (segment1 != prev_segment1) or (segment2 != prev_segment2):
+                                incongruent_mnds.append((mnd, segment1, segment2))
                         else:
-                            incongruent_mnds.append((mnd, segment2))
+                            incongruent_mnds.append((mnd, segment1, segment2))
                         prev_mnd = mnd
                         prev_segment0 = segment0
                         prev_segment1 = segment1
@@ -350,12 +354,13 @@ def main(mnd_path, logfile):
 
     logging.info('***Begin incongruent main data files report***')
     if incongruent_mnds:
-        segment2 = incongruent_mnds[0][1]
+        segment1 = incongruent_mnds[0][1]
+        segment2 = incongruent_mnds[0][2]
         logging.info('Initial gridding:')
-        log_grid(segment2)
-        for mnd, segment2 in incongruent_mnds[1:]:
+        log_grid(segment1, segment2)
+        for mnd, segment1, segment2 in incongruent_mnds[1:]:
             logging.info('Inconguity occurred at {0}'.format(mnd))
-            log_grid(segment2)
+            log_grid(segment1, segment2)
     else:
         logging.info('No inconguent main data files.')
     logging.info('***End inconguent main data files report***')
